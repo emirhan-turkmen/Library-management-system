@@ -1,0 +1,66 @@
+from tkinter import *
+from tkinter import messagebox
+from tkinter import filedialog
+import os
+import sys
+import mysql.connector
+from mysql.connector import Error
+py = sys.executable
+
+#creating window
+class Add(Tk):
+    def __init__(self):
+        super().__init__()
+        self.iconbitmap(r'libico.ico')
+        self.maxsize(500,417)
+        self.minsize(500,417)
+        self.title('Ogrenci Ekle')
+        self.canvas = Canvas(width=500, height=417, bg='gray')
+        self.canvas.pack()
+        n = StringVar()
+        p = StringVar()
+        a = StringVar()
+#verifying input
+        def asi():
+            if len(n.get()) < 1:
+                messagebox.showinfo("Oop's", "Adi giriniz")
+            elif len(p.get()) < 1:
+                messagebox.showinfo("Oop's","Numara giriniz")
+            elif len(a.get()) < 1:
+                messagebox.showinfo("Oop's", "Adresi giriniz")
+            else:
+                try:
+                    self.conn = mysql.connector.connect(host='localhost',
+                                                        database='testdb3',
+                                                        user='root',
+                                                        password='1')
+                    self.myCursor = self.conn.cursor()
+                    name1 = n.get()
+                    pn1 = p.get()
+                    add1 = a.get()
+                    self.myCursor.execute("Insert into student(name,phone_number,address) values (%s,%s,%s)",[name1,pn1,add1])
+                    self.conn.commit()
+                    messagebox.showinfo("Done","Ogrenci Eklendi")
+                    ask = messagebox.askyesno("Confirm","Baska ogrenci eklemek ister misiniz?")
+                    if ask:
+                     self.destroy()
+                     os.system('%s %s' % (py, 'Add_Student.py'))
+                    else:
+                     self.destroy()
+                     self.myCursor.close()
+                     self.conn.close()
+                except Error:
+                    messagebox.showerror("Hata","Bir şeyler ters gitti")
+
+        # label and input box
+        Label(self, text='').pack()
+        Label(self, text='Ogrenci Bilgileri:',bg='gray', fg='black', font=('Courier new', 20, 'bold')).place(x=100, y=10)
+        Label(self, text='Ad:',bg='gray', font=('Courier new', 10, 'bold')).place(x=70, y=82)
+        Entry(self, textvariable=n, width=30).place(x=200, y=84)
+        Label(self, text='Numara:',bg='gray', font=('Courier new', 10, 'bold')).place(x=70, y=130)
+        Entry(self, textvariable=p, width=30).place(x=200, y=132)
+        Label(self, text='Adres:',bg='gray', font=('Courier new', 10, 'bold')).place(x=70, y=180)
+        Entry(self, textvariable=a, width=30).place(x=200, y=182)
+        Button(self, text="Kaydet",width = 15,command=asi).place(x=230, y=220)
+
+Add().mainloop()
